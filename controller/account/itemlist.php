@@ -177,6 +177,81 @@ class ControllerAccountItemList extends Controller {
 		
         }        
     }
+	
+	public function jsonFunc(){
+            //echo "TEST!";
+            $this->language->load('account/itemlist');
+		$this->load->model('catalog/category');
+		$this->load->model('catalog/product');
+		$this->load->model('tool/image'); 
+                               
+		if (isset($this->request->get['catid'])) {
+			$catid = $this->request->get['catid'];
+		} else { 
+			$catid = 0;
+                }
+                
+                if (isset($this->request->get['limit'])) {			
+			$limit = $this->request->get['limit'];
+		} else {			
+			$limit = 5000;
+		}
+	
+		$category_id = 0;
+		
+		$category_info = $this->model_catalog_category->getCategory($category_id);
+					if ($category_id == 0) {
+						$category_info = array('name' => $this->language->get('text_all_products'),
+							
+							'meta_keyword' => '',							
+							'description' => '');
+						//india style fix	
+						$this->request->get['path'] = 0;
+						//india style fix							
+					}		
+                $url = '';
+
+                    $data = array(
+                            'filter_category_id' => $catid,
+                            //'filter_filter'      => $filter, 
+                            //'sort'               => $sort,
+                            'limit'              => $limit,
+                            'start'              => 0
+                            //'coolfilter'         => $coolfilter
+                    );
+
+                    $product_total = $this->model_catalog_product->getTotalProducts($data); 
+
+                    $results = $this->model_catalog_product->getProducts($data);
+
+                    foreach ($results as $result) {                           
+                            if ($result['image']) {
+                                    $image = $this->model_tool_image->resize($result['image'], $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_height'));
+                            } else {
+                                    $image = $this->model_tool_image->resize('placeholder.png', $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_width'), $this->config->get('theme_' . $this->config->get('config_theme') . '_image_product_height'));
+                            }
+
+                        $categories = $this->model_catalog_product->getCategories($result['product_id']);
+                        if ($categories){
+                        $categories_info = $this->model_catalog_category->getCategory($categories[0]['category_id']);
+                        }
+                            $data['products'][] = array(
+					'thumb'       => $image,
+                                    'product_id'  => $result['product_id'],
+                                    'category_id'  => $categories_info['category_id'],
+                                    'category_name'  => $categories_info['name'],
+                                    'image'  => $result['image'],
+                                    'name'        => $result['name'],
+                                    'description' => utf8_substr(strip_tags(html_entity_decode($result['description'], ENT_QUOTES, 'UTF-8')), 0, 300) . '..',
+                                    'price'       => $result['price'],
+                                    'href'        => $this->url->link('product/product', 'path=' . $this->request->get['path'] . '&product_id=' . $result['product_id'] . $url)
+                            );
+                    }
+
+                    $productsJson = json_encode($data['products']);
+                    echo $productsJson;
+
+    }
     
 }
 ?>
