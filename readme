@@ -1,3 +1,5 @@
-Данная страница выводит список товаров всех категорий или определенной категории в виде таблицы фиксированной высоты и ниже в "классическом" виде. Работает с Opencart 3.x.
-При размещении в папке catalog/controller/account доступна по адресу
-http://your_site.com/index.php?route=account/itemlist
+This page displays a list of products of all categories 
+or a specific category in the form of a table of fixed 
+height and below in a "classic" form. Works with Opencart 3.x.
+When placed in the catalog / controller / account folder, available at
+http://your_site.com/index.php?route=account/it
